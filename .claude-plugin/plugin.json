@@ -1,0 +1,20 @@
+{
+  "name": "html-slides",
+  "version": "0.1.0",
+  "description": "Create modern, visually stunning HTML slide presentations. Outputs single-file HTML with scroll-snap navigation, reveal animations, and brand-matched styling. Zero dependencies.",
+  "author": {
+    "name": "Lourenco Castro",
+    "email": "lourenco.castro@teradyne.com"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "html",
+    "design",
+    "deck",
+    "pitch",
+    "single-file"
+  ],
+  "license": "MIT",
+  "skills": "./skills"
+}
