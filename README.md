@@ -1,90 +1,99 @@
-# html-slides
+# slidecraft
 
-A Claude Code plugin for creating brand-matched slide presentations in three output formats: **HTML**, **PPTX**, and **PDF**.
+A Claude Code plugin for brand-matched slide presentations. Three skills, shared design DNA.
 
-## What it does
+## Skills
 
-Generates presentation-grade slides with enforced design rules (one idea per slide, viewport-filling content, ≥1rem body text) and brand extraction (colors and fonts pulled from a `.potx` or `.pptx` template).
+| Skill | Output | Best for |
+|-------|--------|----------|
+| **pptx-deck** | Native `.pptx` via python-pptx | Editable PowerPoint decks, weekly meetings, board material, template compliance |
+| **html-deck** | Single-file HTML with inline CSS/JS + base64 | Pitch decks, external shares, modern viewport-filling visuals, browser-native nav |
+| **ted-designer** | JSON slide spec | Convert a presentation script into a TED-style spec; hand off to pptx-deck or html-deck for rendering |
 
-Three output paths, choose per use case:
-
-| Output | Tool | Best for |
-|--------|------|----------|
-| **HTML** | Inline CSS + JS in a single self-contained file | Pitch decks, external shares, modern viewport-filling visuals, browser-native keyboard nav |
-| **PPTX** | `python-pptx` + template layouts and theme | Editable PowerPoint decks, collaborative editing, matching existing template-based deck series (weekly meetings, board material) |
-| **PDF** | Playwright (from HTML) or PowerPoint (from PPTX) | Email/file-share when editability is not needed |
-
-All three share the same design rules and brand extraction. Pick the right output for the audience and workflow — do not default to HTML when the user wants an editable deck.
+All three share the design rules in `shared/design-rules.md` and the brand extraction logic in `shared/template-extraction.md`. Pick the right output for the audience and workflow.
 
 ## Install
 
 ```bash
 # From a Claude Code session:
-/plugin install html-slides@your-marketplace
+/plugin install slidecraft@your-marketplace
 
 # Or load from local directory during development:
-claude --plugin-dir /path/to/html-slides
+claude --plugin-dir /path/to/slidecraft
 ```
 
 ## Usage
 
-The skill activates when you ask Claude Code to create a presentation, deck, or slides. You can also invoke it directly:
+The right skill activates based on the request. You can also invoke directly:
 
 ```
-/html-slides:html-slides
+/slidecraft:pptx-deck
+/slidecraft:html-deck
+/slidecraft:ted-designer
 ```
 
 **Example prompts:**
 
-HTML output:
+PPTX:
+- "Build a PowerPoint deck matching the template in `Presentation1.potx`"
+- "Generate a .pptx for the weekly meeting matching the other files in this folder"
+- "Create editable slides using this brand template"
+
+HTML:
 - "Create a modern pitch deck about our Q2 results from these notes"
 - "Convert this PowerPoint to a clean, visual HTML deck"
 - "Build a presentation — make it look modern, not like PowerPoint"
 
-PPTX output:
-- "Build a PowerPoint deck matching the template in `Presentation1.potx`"
-- "Generate a .pptx for the weekly meeting — match the other files in this folder"
-- "Create editable slides using this brand template"
+ted-designer:
+- "Turn this script into a TED-style deck spec"
+- "Design slides for this talk using TED principles"
+- "Apply Duarte's contrast structure to my draft"
 
-PDF output:
-- "Export the deck to PDF for email"
-- "Share a PDF version of these slides"
+PDF export is a method on `pptx-deck` (LibreOffice/PowerPoint) and `html-deck` (Playwright). Just ask after generating the source deck.
 
-The skill asks which output format to use when the request is ambiguous.
+## Repository layout
 
-## What's included
-
-| File | Purpose |
-|------|---------|
-| `SKILL.md` | Main skill — output-format decision matrix, workflows, design rules, anti-patterns, checklists |
-| `references/base-structure.md` | Complete HTML/CSS/JS boilerplate template |
-| `references/css-components.md` | HTML layout components (card grids, compare, architecture flow, steps, agenda) |
-| `references/design-rules.md` | 12 shared design rules with implementation details and anti-patterns |
-| `references/template-extraction.md` | Extract brand colors/fonts from PowerPoint templates |
-| `references/pptx-export.md` | PPTX generation via python-pptx — template purge, branded covers, placeholders, card patterns, text sizing |
-| `references/shape-combinations.md` | Multi-shape composite patterns for PPTX |
-| `references/pdf-export.md` | Playwright script for 16:9 PDF export |
-| `references/devtools-review.md` | Chrome DevTools measurement scripts for QA |
-| `references/image-generation.md` | Icon generation patterns and base64 embedding |
+```
+slidecraft/
+├── .claude-plugin/plugin.json
+├── README.md
+├── Presentation1.potx              # default brand template (Teradyne)
+├── shared/                         # cross-skill references
+│   ├── design-rules.md
+│   ├── template-extraction.md
+│   └── image-generation.md
+├── skills/
+│   ├── pptx-deck/
+│   │   ├── SKILL.md
+│   │   └── references/  (pptx-export.md, shape-combinations.md, pdf-export.md)
+│   ├── html-deck/
+│   │   ├── SKILL.md
+│   │   └── references/  (base-structure.md, css-components.md, devtools-review.md, pdf-export.md)
+│   └── ted-designer/
+│       ├── SKILL.md
+│       └── references/  (deferred)
+└── copilot/                        # parallel GitHub Copilot integration (PPTX-focused)
+```
 
 ## Design philosophy
 
 Every rule exists because we hit the problem in practice:
 
 - **One idea per slide** — if you need "and", split it
-- **Content fills the viewport** — no dead zones, no gravity-sink
-- **Body text ≥ 1rem** — anything smaller fails at presentation distance
+- **Content fills the available space** — no dead zones, no gravity-sink
+- **Body text minimum readable size** — anything smaller fails at presentation distance
 - **Cards over bullets** — visual containment aids scanning
-- **Pick the output that fits the workflow** — HTML for visual-first, PPTX for editable/templated, PDF for distribution
+- **Pick the output that fits the workflow** — PPTX for editable/templated, HTML for visual-first, ted-designer for narrative-first
 - **No AI slop** — explicit anti-pattern list prevents generated-looking output
 
 ## Requirements
 
 - Claude Code with plugin support
-- For PPTX export: Python + `python-pptx` + `lxml` (`pip install python-pptx lxml`)
-- For PDF export from HTML: Python + Playwright (`pip install playwright && playwright install chromium`)
-- For DevTools review: Chrome DevTools MCP server (optional but recommended)
-- For image generation: Any image generation API (optional — decks work without images)
+- For PPTX: Python + `python-pptx` + `lxml` (`pip install python-pptx lxml`)
+- For PDF from PPTX: LibreOffice (headless) or PowerPoint
+- For PDF from HTML: Python + Playwright (`pip install playwright && playwright install chromium`)
+- For DevTools review: Chrome DevTools MCP server (optional, recommended)
+- For image generation: any image generation API (optional — decks work without images)
 
 ## License
 
