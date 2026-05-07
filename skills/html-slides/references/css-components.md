@@ -154,13 +154,30 @@ Compare sides use card-like backgrounds at natural height, centered vertically i
 }
 ```
 
-**WARNING:** Do NOT let compare-sides stretch to fill the grid row. Compare panels have sparse text content (label + title + 3-4 lines). Stretching creates tall grey boxes with content lost in the middle. Keep sides at natural height and center the row with `align-content: center`.
+**Always keep compare sides at natural height.** Center the row with `align-content: center`. Never stretch sides to fill — sparse text inside tall boxes creates dead space.
 
-- Compare label: `1rem` uppercase, letter-spacing 0.14em. Use `.old` (coral) and `.new` (teal) variants.
-- Compare title: `clamp(1.8rem, 2.2vw, 2.1rem)` bold
-- Compare body text: `clamp(1.3rem, 1.5vw, 1.45rem)`, line-height 1.7
-- Label margin-bottom: `1.4rem`
-- Title margin-bottom: `1.2rem`
+```css
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 3px 1fr;
+  gap: 3vw;
+  align-content: center;    /* centers natural-height sides */
+}
+.compare-col {
+  background: #f7fafc;
+  border-radius: 14px;
+  padding: 3rem 2.8rem;     /* generous padding, no stretch */
+}
+```
+
+For sparse content (3-4 bullets per side), scale up text sizes so cards have more visual weight:
+- Heading: `clamp(1.7rem, 2.2vw, 2.1rem)` bold
+- Body: `clamp(1.15rem, 1.35vw, 1.3rem)`, line-height 2.0
+- Bullet spacing: `margin-bottom: 1rem`
+
+- Compare label: `0.85rem` uppercase, letter-spacing 0.14em. Use accent color (teal) or `.old`/`.new` variants.
+- Label margin-bottom: `1.5rem`
+- Title margin-bottom: `1.2-1.5rem`
 
 ## Architecture flow
 
@@ -277,6 +294,35 @@ Architecture flows use `margin-block: auto` for vertical centering with `min-hei
 - Column header: bold, navy, bottom border 2px
 - Gap: 4vw between columns
 - Text: standard card-text sizing (1.05rem+)
+
+## Content area (multi-row)
+
+For slides with multiple card rows, use flex with centered distribution. Cards stay at natural height; whitespace distributes between rows.
+
+```html
+<div class="content-area">
+  <div class="context-cards cols-3 reveal d1">
+    <!-- top row -->
+  </div>
+  <div class="context-cards cols-2 reveal d2">
+    <!-- bottom row -->
+  </div>
+</div>
+```
+
+```css
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5vh;
+}
+```
+
+**Key principle**: Never stretch cards to fill space. Let cards size to content (80-100% usable fill). The `justify-content: center` distributes whitespace evenly above and below the card group. The `gap` creates consistent spacing between rows.
+
+**Why not grid with row fractions?** `grid-template-rows: 2fr 3fr` stretches cards taller than their content, creating dead interiors (35-50% fill). Cards with backgrounds make this emptiness visible and unprofessional.
 
 ## Navigation and chrome
 

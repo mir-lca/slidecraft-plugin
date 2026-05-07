@@ -29,7 +29,7 @@ Every HTML slide deck follows this structure. The entire presentation is a singl
 
     /* === TYPOGRAPHY === */
     body {
-      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Helvetica Neue', Arial, sans-serif; /* OVERRIDE with template font — see template-extraction.md */
       color: var(--grey);
       background: var(--bg);
       overflow-x: hidden;
@@ -495,7 +495,7 @@ Every HTML slide deck follows this structure. The entire presentation is a singl
 When starting a new deck from this template:
 
 1. **Replace `:root` variables** with brand colors from template extraction
-2. **Replace font-family** with brand font (or keep Helvetica Neue as safe default)
+2. **Replace font-family** with the template's theme font as the **primary** family (extracted from `fontScheme` major/minor fonts). The template font must come first in the stack, not as a fallback.
 3. **Update accent bar gradient** colors in `.slide::after`
 4. **Update nav dot active color** to match brand
 5. **Set title slide background** to brand's darkest color

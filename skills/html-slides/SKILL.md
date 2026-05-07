@@ -1,27 +1,37 @@
 ---
 name: html-slides
 description: |
-  Create modern, visually stunning HTML slide presentations from content or by converting PowerPoint decks. Outputs single-file HTML with scroll-snap navigation, reveal animations, and brand-matched styling. Use when creating presentations, converting PPTX to HTML slides, building pitch decks, or when user asks for modern/visual/clean slides. Supports PDF export via browser print.
+  Create modern, brand-matched slide presentations. Supports three output formats: HTML (single-file, viewport-filling, browser-native), PPTX (native PowerPoint via python-pptx using a .potx/.pptx template), and PDF (16:9 export from either). Use for presentations, pitch decks, weekly meeting slides, converting PPTX to HTML or HTML to PPTX, and any slide creation where visual quality matters.
 ---
 
 # HTML slides
 
 ## Description
 
-Build presentation-grade HTML slide decks that are more visual, modern, and readable than traditional PowerPoint. Each deck is a single self-contained HTML file with zero dependencies — inline CSS, inline JS, embedded images. Present directly in the browser; export to PDF via Playwright or Cmd+P.
+Build presentation-grade slide decks in three output formats:
 
-Use this skill when:
-- Creating a new presentation from content or notes
-- Converting an existing PPTX to a modern HTML deck
-- User asks for "modern", "visual", "clean", or "less verbose" slides
-- Building internal or external pitch decks
-- Any slide creation where visual quality matters
+- **HTML** — single self-contained file with inline CSS/JS + base64 images. Viewport-filling, browser-native, keyboard-navigable. Best for pitch decks, external shares, modern visual feel.
+- **PPTX** — native PowerPoint built via `python-pptx` using a `.potx`/`.pptx` template. Reuses template layouts, theme, master chrome (footers, gradient bars, branded covers). Best when collaborative editing or template compliance is required.
+- **PDF** — 16:9 landscape export from either HTML (via Playwright) or PPTX (via PowerPoint). Best for email/file-share when editability is not needed.
 
-## When NOT to use
+All three paths share the same design rules (one idea per slide, viewport-filling content, ≥1rem body text) and brand extraction (colors, fonts from theme).
 
-- User explicitly needs a .pptx file for editing in PowerPoint
-- Template compliance is mandatory and non-negotiable
-- Collaborative editing in PowerPoint/Google Slides is required
+## Choose output format BEFORE building
+
+| User says / situation | Output |
+|----------------------|--------|
+| "Modern / visual / clean deck", "pitch deck", no template mentioned | HTML |
+| "Convert this PowerPoint to HTML", "make these slides modern" | HTML |
+| ".pptx", "PowerPoint", "editable slides", "weekly meeting slides matching template", template file provided | **PPTX** |
+| "Match the other slides in this folder" + other files are .pptx | **PPTX** |
+| "Share a PDF", "export for email" | PDF (from HTML or PPTX) |
+
+Ask the user if ambiguous. Never default to HTML when a template is provided or when the user references an existing PPTX deck they want to match — the correct answer is PPTX. HTML is the wrong output even if the skill name starts with "html".
+
+## When NOT to use this skill
+
+- User needs a quick text-only deck with no visual design (use plain markdown)
+- User wants Google Slides natively (neither HTML nor PPTX import perfectly; use Google Slides directly)
 
 ## Workflow 1: Create from content
 
@@ -36,11 +46,11 @@ Use this skill when:
 
 ## Workflow 2: Convert from PPTX
 
-1. **Extract template DNA** — Colors, fonts, design elements (see @references/template-extraction.md)
+1. **Extract template DNA** — Colors, fonts, design elements (see @references/template-extraction.md). **Font extraction is mandatory** — read the `fontScheme` from `ppt/theme/theme1.xml` and use the extracted font as the primary `font-family` in the generated HTML.
 2. **Extract content** — Use `markitdown` or similar tool to get all slide text
 3. **Reduce content** — Apply the "one idea per slide" rule; cut bullets aggressively
 4. **Map to HTML layouts** — Choose the best CSS component for each slide
-5. **Generate HTML** — Build single-file deck with brand colors and elements
+5. **Generate HTML** — Build single-file deck with brand colors and extracted font
 6. **Add images** — Embed icons or diagrams as base64 (resize to 256x256 first)
 7. **Review** — Check every slide against the 5-point readability checklist
 
@@ -95,7 +105,22 @@ Full specs at @references/css-components.md:
 | Agenda | Meeting structure, timed items | `.agenda` |
 | Two-column | Side-by-side lists | `.two-col` |
 
-## Workflow 3: Export to PDF
+## Workflow 3: Export to PPTX (branded PowerPoint)
+
+See @references/pptx-export.md for the full workflow.
+
+Quick summary:
+1. Convert `.potx` to `.pptx` (content-type rewrite via `zipfile`)
+2. Purge sample slides (remove `sldIdLst` entries AND drop relationships AND free filenames)
+3. Extract theme colors (`dk1`, `dk2`, `accent1`–`accent6`) from `ppt/theme/theme1.xml`
+4. Title slide: use a native Cover/Transition layout (default: `Transition 3`). Never rebuild with dark rectangle + custom textboxes.
+5. Content slides: use `Title and Subtitle` layout placeholders for title + subtitle. Never create custom TextBoxes for these.
+6. Build content shapes (cards, bullets, steps) below the placeholder zone. One text frame per card, one text frame for all bullets in a group — never one TextBox per bullet.
+7. Do not duplicate template chrome (gradient bars, logos, footer — the master provides these).
+
+Brand reference (Teradyne `Presentation1.potx`), text-sizing rules, card-centering math, three-panel value layouts, process flows, and OneDrive upload all live in the reference.
+
+## Workflow 4: Export to PDF
 
 See @references/pdf-export.md for the complete Playwright export script.
 
@@ -105,7 +130,7 @@ Quick summary:
 3. Export at 16:9 landscape (13.33in x 7.5in) with `print_background=True`
 4. Output goes alongside the HTML file with same name, `.pdf` extension
 
-## Workflow 4: Review with Chrome DevTools
+## Workflow 5: Review with Chrome DevTools
 
 See @references/devtools-review.md for measurement scripts.
 

@@ -45,12 +45,14 @@ major = root.find('.//a:majorFont/a:latin', ns)
 minor = root.find('.//a:minorFont/a:latin', ns)
 ```
 
-Map to CSS:
+Map to CSS — use the extracted font as the **primary** family, not a fallback:
 ```css
 body {
-  font-family: '[minor font]', 'Helvetica Neue', sans-serif;
+  font-family: '[extracted font]', 'Helvetica Neue', sans-serif;  /* e.g. Arial, Calibri */
 }
 ```
+
+**Critical:** The template's font MUST be the first entry in `font-family`. If the template uses Arial, the CSS must be `font-family: Arial, 'Helvetica Neue', sans-serif;` — not `'Helvetica Neue', Arial, sans-serif`. The template font takes priority over the base-structure default.
 
 ### Design elements
 

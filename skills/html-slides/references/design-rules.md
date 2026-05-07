@@ -14,29 +14,37 @@ Every slide communicates exactly one concept. If you need the word "and" in your
 
 Cards, text blocks, and visual elements must be vertically centered in the available space. Dead zones (large empty areas between title and content) destroy readability and make the deck feel unfinished.
 
-**Implementation**: Every flex-child content area needs an explicit centering and sizing strategy. The pattern varies by component type:
+**Implementation**: Content areas use `flex: 1` + `justify-content: center` + `gap` to distribute whitespace BETWEEN natural-height children — never inside them. Cards size to their content; whitespace lives between structural blocks (title area, card rows, discussion bar).
 
-| Component | Centering strategy | Sizing constraint |
-|-----------|-------------------|-------------------|
-| Card grid | `flex: 1` + `align-content: center` | `max-height: 65vh` on cards |
-| Compare layout | `flex: 1` + `align-content: center` | Natural height sides (no stretch) |
+| Component | Content area strategy | Card sizing |
+|-----------|----------------------|-------------|
+| Card grid | `flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2.5vh;` | Natural height (no stretch) |
+| Compare layout | `align-content: center` on grid | Natural height with padding |
 | Architecture flow | `margin-block: auto` | `min-height: 40vh` + `max-height: 55vh` |
 | Agenda/sparse grid | `margin-block: auto` | Natural content size |
 
-**Anti-pattern**: Using `flex: 1` on a content container without a sizing constraint. Grid rows auto-expand to fill a stretched container, creating over-sized empty boxes. Every `flex: 1` needs a corresponding `max-height`, `align-content: center`, or both to prevent this.
+**Core principle**: Whitespace between elements is design. Whitespace inside a card is dead space. Cards should have 80%+ usable fill ratio (content height / card height minus padding).
+
+**Anti-pattern**: Stretching cards to fill viewport height. Grid rows with `align-content: stretch` or `grid-template-rows: 1fr` force cards taller than their content, creating empty interiors. Fix: let cards be natural height and use `justify-content: center` on the parent to distribute space between elements.
+
+**Anti-pattern**: Using `flex: 1` on a content container without a centering strategy. Without `justify-content: center`, content gravitates to the top leaving dead space below.
 
 ### 3. Minimum text sizes
 
-| Element | Minimum | Recommended |
-|---------|---------|-------------|
-| Slide title | 2rem (32px) | 2.5-3rem |
-| Subtitle | 1rem (16px) | 1.15-1.25rem |
-| Card heading | 1.1rem (18px) | 1.2-1.35rem |
-| Card body text | 1rem (16px) | 1.05-1.15rem |
-| Labels/captions | 0.75rem (12px) | 0.8rem |
-| Footnotes | 0.8rem (13px) | 0.85rem |
+| Element | Minimum | Recommended | Sparse slide (few bullets) |
+|---------|---------|-------------|---------------------------|
+| Slide title | 2rem (32px) | 2.5-3rem | Same |
+| Subtitle | 1rem (16px) | 1.15-1.25rem | Same |
+| Card heading | 1.1rem (18px) | 1.2-1.35rem | 1.5-2rem |
+| Card body text | 1rem (16px) | 1.05-1.15rem | 1.15-1.3rem |
+| Compare heading | 1.4rem (22px) | 1.5-1.9rem | 1.7-2.1rem |
+| Compare body text | 1rem (16px) | 1.1-1.25rem | 1.15-1.3rem |
+| Labels/captions | 0.75rem (12px) | 0.8rem | Same |
+| Footnotes | 0.8rem (13px) | 0.85rem | Same |
 
 **Why**: Presentation distance is 2-5 meters. Text below 1rem becomes unreadable. Card body text at 0.9rem (the most common mistake) fails at any distance beyond arm's length.
+
+**Sparse content rule**: When a slide has fewer than 6 bullet points total across all cards, scale up heading and body text sizes to the "sparse slide" column. Also increase `line-height` to 1.8-2.0 and bullet `margin-bottom` to 0.8-1rem. This fills card space naturally without adding filler content.
 
 ### 4. White space is hierarchy, not emptiness
 
@@ -123,6 +131,39 @@ Physical units are only acceptable in `@page` rules for print/PDF export. The li
 
 This applies to one-pagers and single-page documents too — use `100vw`/`100vh` for the body, not fixed paper dimensions.
 
+## PPTX-specific rules
+
+When generating PPTX via python-pptx (Workflow 3), these additional rules apply on top of the HTML design rules:
+
+### Text rendering differences
+- PPTX text renders larger than HTML at equivalent sizes. A `Pt(16)` bullet in PPTX is roughly equivalent to `1.1rem` in HTML.
+- Text wrapping in narrow PPTX columns is less predictable than CSS. Always allow extra height for heading text boxes (`emu(0.65)` minimum) to accommodate 2-line wrapping.
+- Use XML `buChar` elements for proper PowerPoint bullets with `marL`/`indent` hanging indent. All bullet items in a single text frame with multiple paragraphs — never one TextBox per bullet.
+
+### Card content structure
+- Each card's content (label, heading, description) goes in ONE text frame with multiple paragraphs, not separate TextBoxes.
+- Set text frame anchor to `ctr` for vertical centering within the card.
+- Pad text frame 0.40" inward from card edges.
+- Use `space_after` between paragraphs for consistent gaps.
+
+### Text contrast per card
+- Check each card's fill color independently before choosing text color.
+- Dark fills (#1A2744, #0D1D3B): headings white, body #E2E8F0, labels teal.
+- Light fills (#FFFFFF, #F4F5F7): headings #1A2744, body #2D3748.
+- Never apply one text color to all cards on a slide — each card is independent.
+
+### Template coexistence
+- Never add elements the template master already provides (gradient bars, logos, footers, slide numbers). Check the blank layout first.
+- Save generated files to `/tmp/` to avoid OneDrive sync conflicts. Upload via Graph API for verification.
+- Use Chrome DevTools MCP to take screenshots of each slide in PowerPoint Online for visual verification.
+
+### Card sizing strategy
+- Size card height to content — cards with less text should be shorter. No large empty dead zones.
+- Match card heights within the same row to the tallest card (so they align), but don't force all rows to the same height.
+- In 3-col layouts, headings that are longer than ~20 characters will wrap. Account for this in card height.
+- Use `card_y(height) = ZONE_TOP + (ZONE_H - height) // 2` for vertical centering.
+- After placing cards, shift adjacent elements (footnotes, callouts) to avoid wasted space.
+
 ## Common mistakes and fixes
 
 | Mistake | Fix |
@@ -137,5 +178,8 @@ This applies to one-pagers and single-page documents too — use `100vw`/`100vh`
 | Same data shown as table AND chart | Pick one format; remove the redundant section |
 | Fixed mm/cm/in dimensions on body | Use 100vw/100vh; reserve physical units for @page only |
 | Compare panels stretch to fill viewport | Use `align-content: center` on grid; keep sides at natural height |
+| Cards stretched to fill viewport with <50% fill | Let cards be natural height; use `justify-content: center` on parent flex to distribute space between elements |
+| Whitespace inside cards instead of between elements | Remove `align-content: stretch` / `grid-template-rows: Xfr`; whitespace belongs between structural blocks, not inside containers |
 | Architecture flow fills full slide height | Use `margin-block: auto` + `min-height: 40vh` / `max-height: 55vh` instead of `flex: 1` |
 | `flex: 1` on container without sizing constraint | Always pair with `max-height`, `align-content: center`, or `min/max-height` range |
+| Content area uses flex but cards don't stretch | Use `display: grid` + `grid-template-rows` on `.content-area` instead of flex for multi-row layouts |
