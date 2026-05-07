@@ -48,6 +48,28 @@ Output: one `.html` file, no external assets. Open in any browser. Optional PDF 
 6. **Add images** — Embed as base64
 7. **Review** — Run the readability checklist on every slide
 
+### Workflow 3: Render from ted-designer spec
+
+When the user has already produced a slide spec via `ted-designer`, skip the planning step and consume the spec directly.
+
+1. **Validate spec** — Check `schema_version` is `1.0` (or compatible). Reject otherwise.
+2. **Surface warnings** — Print any `story.structural_warnings` so the user can see them before render proceeds.
+3. **Check image assets** — For each slide with `image.prompt` but null `image.asset_path`, halt and list missing prompts. The user runs image generation, fills in `asset_path`, and re-invokes.
+4. **Apply brand** — Use `brand.*` fields if present; otherwise fall back to default `Presentation1.potx` extraction.
+5. **Render slide-by-slide** — Map each archetype to a CSS component or new pattern:
+   - `full-bleed-image` → `<section class="slide bleed">` with full-viewport `<img>` + optional caption overlay
+   - `big-number` → centered typographic layout, number in massive font + label below
+   - `quote` → centered pull-quote with attribution, optional portrait
+   - `typographic` → centered headline, no other content
+   - `chart` → embed chart as SVG with highlighted series + takeaway title
+   - `contrast-pair` → 2-column grid, two images + two labels
+   - `section-divider` → use `.title-slide` class with optional muted background
+   - `blank` → solid black/brand-neutral slide, no content
+6. **Embed speaker notes** — `speaker_notes.script` + `speaker_notes.transition_cue` go into a `<aside class="notes">` block, hidden by default but available via `?notes=1` query param
+7. **STAR marker** — Add `<!-- STAR moment -->` HTML comment at the STAR slide
+
+See @../ted-designer/references/spec-schema.md for full schema.
+
 ## Design rules (summary)
 
 Full rules at @../../shared/design-rules.md. Non-negotiable:

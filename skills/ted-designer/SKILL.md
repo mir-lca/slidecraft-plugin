@@ -108,9 +108,9 @@ After emitting the spec:
 
 ## References
 
-- @references/archetypes.md — detailed archetype descriptions (deferred)
-- @references/contrast-structure.md — Duarte contrast pattern detection (deferred)
-- @references/spec-schema.md — full JSON schema for spec handoff (deferred)
+- @references/archetypes.md — detailed archetype descriptions, selection guide, image-prompt patterns per archetype
+- @references/contrast-structure.md — Duarte contrast pattern detection, sparkline analysis, STAR moment identification, structural gates
+- @references/spec-schema.md — full JSON schema for spec handoff (versioned, renderer-agnostic)
 - @../../shared/design-rules.md — shared design rules
 - @../../shared/image-generation.md — image-gen prompt patterns
 

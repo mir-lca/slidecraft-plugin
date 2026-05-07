@@ -37,6 +37,28 @@ Default template lives at the plugin root: `Presentation1.potx` (Teradyne brand)
 8. **Verify** — Open the file, check: layouts inherited, fonts correct, theme colors applied, no duplicated chrome.
 9. **Export to PDF if requested** — See @references/pdf-export.md.
 
+## Workflow: Render from ted-designer spec
+
+When the user has already produced a slide spec via `ted-designer`, skip the planning step and consume the spec directly.
+
+1. **Validate spec** — Check `schema_version` is `1.0` (or compatible). Reject otherwise.
+2. **Surface warnings** — Print any `story.structural_warnings` so the user can see them before render proceeds.
+3. **Check image assets** — For each slide with `image.prompt` but null `image.asset_path`, halt and list missing prompts. The user runs image generation, fills in `asset_path`, and re-invokes.
+4. **Apply brand** — Use `brand.template_path` if present; otherwise fall back to default `Presentation1.potx`.
+5. **Render slide-by-slide** — Map each archetype to the appropriate PPTX layout:
+   - `full-bleed-image` → custom layout with picture placeholder filling slide
+   - `big-number` → typographic layout, large number placeholder + label
+   - `quote` → text-heavy layout with quote + attribution
+   - `typographic` → text-only layout, single oversized phrase
+   - `chart` → chart layout with python-pptx chart construction
+   - `contrast-pair` → two-column layout, two pictures + two labels
+   - `section-divider` → use template's section divider layout
+   - `blank` → use template's blank layout
+6. **Embed speaker notes** — `speaker_notes.script` + `speaker_notes.transition_cue` go into the slide's notes pane
+7. **STAR marker** — Add `<!-- STAR moment -->` comment in the slide notes for the slide where `is_star: true`
+
+See @../ted-designer/references/spec-schema.md for full schema.
+
 ## Design rules (summary)
 
 Full rules at @../../shared/design-rules.md. Non-negotiable:
