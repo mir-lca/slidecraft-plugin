@@ -381,6 +381,21 @@ Every HTML slide deck follows this structure. The entire presentation is a singl
       letter-spacing: 0.1em;
     }
 
+    /* === AI DISCLAIMER === */
+    .ai-disclaimer {
+      position: absolute;
+      bottom: 0.55rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.62rem;
+      color: var(--light-grey);
+      opacity: 0.38;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 1;
+    }
+
     /* === REVEAL ANIMATIONS === */
     .reveal {
       opacity: 0;
@@ -434,9 +449,11 @@ Every HTML slide deck follows this structure. The entire presentation is a singl
     </div>
     <span class="slide-num">02</span>
     <span class="slide-footer">BRAND</span>
+    <span class="ai-disclaimer">Generated with Claude claude-sonnet-4-6</span>
   </section>
 
   <!-- Add more slides following the same pattern -->
+  <!-- IMPORTANT: Every <section class="slide"> must end with <span class="ai-disclaimer">Generated with Claude [model-name]</span> -->
 
   <script>
     // === SCROLL PROGRESS ===

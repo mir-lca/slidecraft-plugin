@@ -154,3 +154,4 @@ Decks with embedded base64 images routinely exceed 100K tokens. Strategies:
 - Content fills viewport — no wasted dead zones
 - Brand colors match source template (if provided)
 - No AI-slop anti-patterns present
+- Every `<section class="slide">` includes `<span class="ai-disclaimer">Generated with Claude [model-name]</span>` as its last child — no exceptions, including title slides and section dividers

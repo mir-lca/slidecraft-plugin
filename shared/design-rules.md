@@ -131,6 +131,43 @@ Physical units are only acceptable in `@page` rules for print/PDF export. The li
 
 This applies to one-pagers and single-page documents too — use `100vw`/`100vh` for the body, not fixed paper dimensions.
 
+### 13. AI generation attribution
+
+Every slide must carry a subtle disclaimer identifying it as AI-generated and naming the model used.
+
+**Why**: Transparency about AI-generated content is a professional norm. Recipients deserve to know.
+
+**Text**: `Generated with Claude [model-name]` — use the actual model identifier you are running as (e.g. `claude-sonnet-4-6`, `claude-opus-4-8`).
+
+**HTML implementation**: Add a `.ai-disclaimer` element as the last child of every `<section class="slide">`:
+```html
+<span class="ai-disclaimer">Generated with Claude claude-sonnet-4-6</span>
+```
+CSS (add to the base stylesheet):
+```css
+.ai-disclaimer {
+  position: absolute;
+  bottom: 0.55rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  color: var(--light-grey);
+  opacity: 0.38;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1;
+}
+```
+
+**PPTX implementation**: After building all slide shapes, add a text box anchored to the bottom center of every slide:
+- Position: horizontally centered, `bottom: 0.28in` from slide edge
+- Width: `4in`, height: `0.22in`
+- Font: `7pt`, color `RGB(170, 170, 170)`, paragraph alignment `CENTER`
+- No fill, no border, not selectable by the audience
+
+**Scope**: Every slide including title slides and section dividers. Never skip.
+
 ## PPTX-specific rules
 
 When generating PPTX via python-pptx (Workflow 3), these additional rules apply on top of the HTML design rules:

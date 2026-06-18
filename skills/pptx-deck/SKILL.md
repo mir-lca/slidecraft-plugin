@@ -108,3 +108,4 @@ Run against every slide:
 - Body text >= 18pt everywhere
 - No AI-slop anti-patterns present
 - File remains editable downstream (no flattened images of text)
+- Every slide has an AI disclaimer text box: `Generated with Claude [model-name]`, 7pt, RGB(170,170,170), horizontally centered, anchored 0.28in from slide bottom — no exceptions
